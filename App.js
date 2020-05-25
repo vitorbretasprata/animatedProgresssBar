@@ -1,6 +1,10 @@
 import React, { useRef } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { 
+import Animated from "react-native-reanimated";
+import { ScrollView, State, createNativeWrapper, BaseButton } from "react-native-gesture-handler";
+import { withTransition } from "react-native-redash";
+
+const { 
   interpolate,
   useCode, 
   cond, 
@@ -9,10 +13,17 @@ import Animated, {
   eq, 
   Value, 
   set,
-  Extrapolate
- } from "react-native-reanimated";
-import { ScrollView, BaseButton, State } from "react-native-gesture-handler";
-import { withTransition } from "react-native-redash";
+  Extrapolate,
+  createAnimatedComponent 
+ } = Animated;
+
+const AnimatedRawButton = createNativeWrapper(
+  createAnimatedComponent(BaseButton),
+  {
+    shouldCancelWhenOutside: false,
+    shouldActivateOnStart: false,
+  }
+);
 
 import ProgressBar from "./src/progressBar";
 
@@ -37,8 +48,9 @@ export default function App() {
   }, [state]);
 
   const scroll = () => {
-      index++;
-      if(scrollRef.current && scrollRef.current.scrollTo) {
+      if(scrollRef.current && scrollRef.current.scrollTo && position._value <= 1) {
+        index++;
+        position.setValue(position + 0.2);
         scrollRef.current.scrollTo({
           animated: true,
           x: 300 * index,
@@ -78,16 +90,20 @@ export default function App() {
         ))}        
       </ScrollView>
       
-      <BaseButton
+      <AnimatedRawButton
         onHandlerStateChange={HandleChange}
         onPress={scroll}
       >
         <View accessible>
-          <Text>
-            Next
-          </Text>
+          
+            <Animated.View>
+              <Text>
+                Next
+              </Text>
+            </Animated.View>              
+          
         </View>
-      </BaseButton>
+      </AnimatedRawButton>
     </View>
   );
 }
